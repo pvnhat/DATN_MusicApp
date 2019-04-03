@@ -8,12 +8,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.framgia.music_22.utils.Constant;
 import com.framgia.vnnht.music_22.R;
 
-public class SlidePagerAdapter extends PagerAdapter implements View.OnClickListener {
+public class SlidePagerAdapter extends PagerAdapter {
 
     private String[] mImages = {
             Constant.BANNER_ITEM1, Constant.BANNER_ITEM2, Constant.BANNER_ITEM3,
@@ -21,9 +20,11 @@ public class SlidePagerAdapter extends PagerAdapter implements View.OnClickListe
     };
     private Context mContext;
     private LayoutInflater mLayoutInflater;
+    private HomeCallBack mHomeCallBack;
 
-    public SlidePagerAdapter(Context context) {
+    public SlidePagerAdapter(Context context, HomeCallBack homeCallBack) {
         mContext = context;
+        mHomeCallBack = homeCallBack;
     }
 
     @Override
@@ -38,13 +39,18 @@ public class SlidePagerAdapter extends PagerAdapter implements View.OnClickListe
 
     @NonNull
     @Override
-    public Object instantiateItem(@NonNull ViewGroup container, int position) {
+    public Object instantiateItem(@NonNull ViewGroup container, final int position) {
         mLayoutInflater =
                 (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View itemView = mLayoutInflater.inflate(R.layout.slide_item_pager, container, false);
         ImageButton imageButtonSlideItem = itemView.findViewById(R.id.imagebutton_slide_item);
         Glide.with(mContext).load(mImages[position]).into(imageButtonSlideItem);
-        imageButtonSlideItem.setOnClickListener(this);
+        imageButtonSlideItem.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mHomeCallBack.onSlideClicked(position);
+            }
+        });
         container.addView(itemView);
         return itemView;
     }
@@ -52,10 +58,5 @@ public class SlidePagerAdapter extends PagerAdapter implements View.OnClickListe
     @Override
     public void destroyItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
         container.removeView((ConstraintLayout) object);
-    }
-
-    @Override
-    public void onClick(View view) {
-        Toast.makeText(mContext, R.string.string_onclick_item, Toast.LENGTH_SHORT).show();
     }
 }

@@ -12,13 +12,14 @@ import com.framgia.music_22.data.repository.SongRepository;
 import com.framgia.music_22.data.source.local.SongLocalDataSource;
 import com.framgia.music_22.data.source.remote.SongRemoteDataSource;
 import com.framgia.music_22.screen.base.BaseFragment;
+import com.framgia.music_22.screen.main.ReloadFragmentCallBack;
 import com.framgia.music_22.screen.music_player.PlayMusicFragment;
 import com.framgia.music_22.screen.song_list.OnItemClickListener;
 import com.framgia.vnnht.music_22.R;
 import java.util.List;
 
 public class OfflineFragment extends BaseFragment
-    implements OfflineContract.View, OnItemClickListener {
+    implements OfflineContract.View, OnItemClickListener, ReloadFragmentCallBack {
 
     public static String TAG = "OfflineFragment";
     private List<OfflineSong> mOfflineSongList;
@@ -44,6 +45,7 @@ public class OfflineFragment extends BaseFragment
         mAdapter = new OfflineSongAdapter(getContext());
         mRecyclerSongList.setAdapter(mAdapter);
         mAdapter.setOnItemClickListener(this);
+        getMainActivity().setReloadFragmentCallBack(this);
     }
 
     public void initData() {
@@ -74,5 +76,10 @@ public class OfflineFragment extends BaseFragment
         getMainActivity().addFragment(
             PlayMusicFragment.getOfflineInstance(mOfflineSongList, position, true), true,
             PlayMusicFragment.TAG, false);
+    }
+
+    @Override
+    public void reloadFragment() {
+        initData();
     }
 }

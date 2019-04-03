@@ -2,38 +2,59 @@ package com.framgia.music_22.screen.music_player;
 
 import android.app.DownloadManager;
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 import com.framgia.music_22.data.model.OfflineSong;
 import com.framgia.music_22.data.model.Song;
 import com.framgia.music_22.data.source.local.sqlite.DatabaseSQLite;
 import com.framgia.music_22.screen.main.MainActivity;
+import com.framgia.music_22.screen.main.NotificationCallBack;
+import com.framgia.music_22.screen.main.NotificationReceiver;
 import com.framgia.music_22.utils.ConnectionChecking;
 import com.framgia.music_22.utils.Constant;
 import com.framgia.vnnht.music_22.R;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.Callable;
 
-public class PlayMusicService extends Service {
+public class PlayMusicService extends Service implements NotificationCallBack {
 
     public static final int CHECK_NO_LOOP = 1;
     public static final int CHECK_LOOP_ALL = 2;
     public static final int CHECK_SHUFFLE = 3;
+
+    private String sChannelId = "music_app_id";
+    private static final String sChannelName = "Music_App_Name";
 
     private static final String EXTRA_PLAY_SONG_ONLINE_LIST = "EXTRA_PLAY_SONG_ONLINE_LIST";
     private static final String EXTRA_PLAY_SONG_OFFLINE_LIST = "EXTRA_PLAY_SONG_OFFLINE_LIST";
@@ -53,6 +74,8 @@ public class PlayMusicService extends Service {
     private List<Song> mOnlineSongList = new ArrayList<>();
     private List<OfflineSong> mOfflineSongList = new ArrayList<>();
     private boolean mIsOffline;
+    private NotificationReceiver mNotificationReceiver;
+
     DatabaseSQLite mDatabaseSQLite = new DatabaseSQLite(this);
 
     public static Intent getOnlineInstance(Context context, List<Song> songList, int position) {
@@ -82,7 +105,16 @@ public class PlayMusicService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        initData();
+    }
+
+    private void initData() {
         mConnectionChecking = new ConnectionChecking(this.getApplicationContext());
+        mNotificationReceiver = new NotificationReceiver(this);
+
+        registerReceiver(mNotificationReceiver, new IntentFilter(Constant.ACTION_PLAY_PAUSE));
+        registerReceiver(mNotificationReceiver, new IntentFilter(Constant.ACTION_PREVIOUS));
+        registerReceiver(mNotificationReceiver, new IntentFilter(Constant.ACTION_PLAY_NEXT));
     }
 
     @Override
@@ -135,7 +167,7 @@ public class PlayMusicService extends Service {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            startForeground(ID_FOREGROUND_SERVICE, initForegroundService());
+            loadBitmapToStartNotification(false);
         } else {
             Toast.makeText(this, getResources().getString(R.string.text_connection_information),
                     Toast.LENGTH_SHORT).show();
@@ -172,42 +204,15 @@ public class PlayMusicService extends Service {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        startForeground(ID_FOREGROUND_SERVICE, initForegroundService());
-    }
-
-    public Notification initForegroundService() {
-        Notification notification;
-        Intent notitificationInten = new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notitificationInten, 0);
-        if (!mIsOffline) {
-            notification = new NotificationCompat.Builder(this).setContentTitle(
-                    getString(R.string.text_notification_playing))
-                    .setAutoCancel(true)
-                    .setSmallIcon(R.drawable.ic_notification_playing)
-                    .setContentTitle(mOnlineSongList.get(mPosition).getTitle())
-                    .setContentIntent(pendingIntent)
-                    .setWhen(System.currentTimeMillis())
-                    .build();
-        } else {
-            notification = new NotificationCompat.Builder(this).setContentTitle(
-                    getString(R.string.text_notification_playing))
-                    .setAutoCancel(true)
-                    .setSmallIcon(R.drawable.ic_notification_playing)
-                    .setContentTitle(mOfflineSongList.get(mPosition).getTitle())
-                    .setContentIntent(pendingIntent)
-                    .setWhen(System.currentTimeMillis())
-                    .build();
-        }
-
-        return notification;
+        loadBitmapToStartNotification(false);
     }
 
     public void registerClient(MusicServiceContract musicServiceContract) {
         mView = musicServiceContract;
     }
 
-    public class LocalBinder extends Binder {
-        public PlayMusicService getServiceInstance() {
+    class LocalBinder extends Binder {
+        PlayMusicService getServiceInstance() {
             return PlayMusicService.this;
         }
     }
@@ -218,13 +223,15 @@ public class PlayMusicService extends Service {
 
     public void pauseSong() {
         mMediaPlayer.pause();
-        stopForeground(true);
+        pausePlayIcon = R.drawable.ic_play_arrow_black_24dp;
+        loadBitmapToStartNotification(true);
     }
 
     public void continueSong() {
         if (!mMediaPlayer.isPlaying()) {
             mMediaPlayer.start();
-            startForeground(ID_FOREGROUND_SERVICE, initForegroundService());
+            pausePlayIcon = R.drawable.ic_pause_black_24dp;
+            loadBitmapToStartNotification(false);
         }
     }
 
@@ -351,4 +358,174 @@ public class PlayMusicService extends Service {
         }
         return wasDownloaded;
     }
+
+
+    /* --------NOTIFICATION AREA  --------------- */
+
+    /**
+     * Load Avatar bitmap -> startForeground
+     */
+
+    private int pausePlayIcon = R.drawable.ic_pause_black_24dp;
+
+    private Observable<Bitmap> getBitmapArtistAvatar(final String urlString) {
+        return Observable.fromCallable(new Callable<Bitmap>() {
+            @Override
+            public Bitmap call() throws Exception {
+                URL url = new URL(urlString);
+                InputStream inputStream = url.openConnection().getInputStream();
+                return BitmapFactory.decodeStream(inputStream);
+            }
+        });
+    }
+
+    private void loadBitmapToStartNotification(final Boolean isThenStop) {
+        Disposable disposable = getBitmapArtistAvatar(
+                mOnlineSongList.get(mPosition).getArtist().getAvatarUrl()).subscribeOn(
+                Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<Bitmap>() {
+                    @Override
+                    public void accept(Bitmap bitmap) throws Exception {
+                        startForeground(ID_FOREGROUND_SERVICE, initForegroundService(bitmap));
+                        if (isThenStop) {
+                            stopForeground(false);
+                        }
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) throws Exception {
+                        startForeground(ID_FOREGROUND_SERVICE, initForegroundService(null));
+                    }
+                });
+    }
+
+    public Notification initForegroundService(Bitmap bitmap) {
+
+        Intent iPre = new Intent(Constant.ACTION_PREVIOUS);
+        Intent iPause = new Intent(Constant.ACTION_PLAY_PAUSE);
+        Intent iNext = new Intent(Constant.ACTION_PLAY_NEXT);
+
+        PendingIntent pPrevious =
+                PendingIntent.getBroadcast(this, 0, iPre, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent pPause =
+                PendingIntent.getBroadcast(this, 0, iPause, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent pNext =
+                PendingIntent.getBroadcast(this, 0, iNext, PendingIntent.FLAG_CANCEL_CURRENT);
+        NotificationCompat.Action actionPrevious =
+                new NotificationCompat.Action.Builder(R.drawable.ic_skip_previous_black_24dp,
+                        Constant.PREVIOUS, pPrevious).build();
+        NotificationCompat.Action actionPause =
+                new NotificationCompat.Action.Builder(pausePlayIcon, Constant.PAUSE,
+                        pPause).build();
+        NotificationCompat.Action actionNext =
+                new NotificationCompat.Action.Builder(R.drawable.ic_skip_next_black_24dp,
+                        Constant.NEXT, pNext).build();
+
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        notificationIntent.setAction(Constant.GO_TO_PLAYER);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            sChannelId = createNotificationChannelAndroidO(sChannelId, sChannelName);
+        }
+
+        Notification notification;
+        if (!mIsOffline) {
+            notification = new NotificationCompat.Builder(this, sChannelId).setContentTitle(
+                    getString(R.string.text_notification_playing))
+                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                    .setSmallIcon(R.drawable.ic_notification_playing)
+                    .setLargeIcon(bitmap)
+                    .setContentTitle(mOnlineSongList.get(mPosition).getTitle())
+                    .setContentIntent(pendingIntent)
+                    .addAction(actionPrevious)
+                    .addAction(actionPause)
+                    .addAction(actionNext)
+                    .setDefaults(0)
+                    .setColor(Color.GRAY)
+                    .setStyle(
+                            new android.support.v4.media.app.NotificationCompat.MediaStyle().setShowActionsInCompactView(
+                                    0, 1, 2))
+                    .build();
+        } else {
+            Bitmap bitmapIcon = BitmapFactory.decodeResource(this.getResources(),
+                    R.drawable.default_avatart_song);
+            notification = new NotificationCompat.Builder(this, sChannelId).setContentTitle(
+                    getString(R.string.text_notification_playing))
+                    .setAutoCancel(true)
+                    .setLargeIcon(bitmapIcon)
+                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                    .setSmallIcon(R.drawable.ic_notification_playing)
+                    .setContentTitle(mOfflineSongList.get(mPosition).getTitle())
+                    .setContentIntent(pendingIntent)
+                    .addAction(actionPrevious)
+                    .addAction(actionPause)
+                    .addAction(actionNext)
+                    .build();
+        }
+
+        return notification;
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private String createNotificationChannelAndroidO(String channelId, String channelName) {
+        NotificationChannel channel =
+                new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_LOW);
+        channel.enableLights(true);
+        channel.setSound(null, null);
+        channel.setLightColor(Color.BLUE);
+        channel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        assert notificationManager != null;
+        notificationManager.createNotificationChannel(channel);
+        return channelId;
+    }
+
+    @Override
+    public void onBackClicked() {
+        previousSong();
+    }
+
+    @Override
+    public void onPauseClicked() {
+        if (mMediaPlayer.isPlaying()) {
+            pauseSong();
+        } else {
+            continueSong();
+        }
+    }
+
+    @Override
+    public void onNextClicked() {
+        nextSong(true);
+    }
+
+    @Override
+    public void onNotifiClicked() {
+    }
+
+    /*class NotificationReceiver extends BroadcastReceiver {
+
+        @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            switch (Objects.requireNonNull(intent.getAction())) {
+                case Constant.ACTION_PREVIOUS:
+                    previousSong();
+                    break;
+                case Constant.ACTION_PLAY_NEXT:
+                    nextSong(true);
+                    break;
+                case Constant.ACTION_PLAY_PAUSE: {
+                    if (mMediaPlayer.isPlaying()) {
+                        pauseSong();
+                    } else {
+                        continueSong();
+                    }
+                    break;
+                }
+            }
+        }
+    }*/
 }
