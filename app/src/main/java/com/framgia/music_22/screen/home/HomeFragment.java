@@ -13,15 +13,20 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+import com.framgia.music_22.data.model.Artist;
+import com.framgia.music_22.data.model.Song;
 import com.framgia.music_22.screen.base.BaseFragment;
+import com.framgia.music_22.screen.music_player.PlayMusicFragment;
 import com.framgia.music_22.screen.song_list.SongByGenreFragment;
 import com.framgia.music_22.utils.ConnectionChecking;
 import com.framgia.music_22.utils.Constant;
 import com.framgia.music_22.utils.TypeGenre;
 import com.framgia.vnnht.music_22.R;
+import java.util.ArrayList;
 
 public class HomeFragment extends BaseFragment
-    implements HomePageContract.View, ViewPager.OnPageChangeListener, View.OnClickListener {
+        implements HomePageContract.View, ViewPager.OnPageChangeListener, View.OnClickListener,
+        HomeCallBack {
 
     public static final String TAG = "HomeFragment";
     private static int DELAY_TIME = 2000;
@@ -55,7 +60,7 @@ public class HomeFragment extends BaseFragment
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-        Bundle savedInstanceState) {
+            Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home_page, container, false);
         initView(view);
 
@@ -80,11 +85,11 @@ public class HomeFragment extends BaseFragment
         buttonClassic.setOnClickListener(this);
 
         mHandler = new Handler();
-        slidePagerAdapter = new SlidePagerAdapter(getActivity());
+        slidePagerAdapter = new SlidePagerAdapter(getActivity(), this);
         viewPagerBanner.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset,
-                int positionOffsetPixels) {
+                    int positionOffsetPixels) {
             }
 
             @Override
@@ -110,16 +115,16 @@ public class HomeFragment extends BaseFragment
             imageDots[i] = new ImageView(getActivity());
             if (i == currentPosition) {
                 imageDots[i].setImageDrawable(
-                    ContextCompat.getDrawable(getActivity(), R.drawable.active_dots));
+                        ContextCompat.getDrawable(getActivity(), R.drawable.active_dots));
             } else {
                 imageDots[i].setImageDrawable(
-                    ContextCompat.getDrawable(getActivity(), R.drawable.unactive_dots));
+                        ContextCompat.getDrawable(getActivity(), R.drawable.unactive_dots));
             }
             LinearLayout.LayoutParams layoutParams =
-                new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT);
+                    new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT);
             layoutParams.setMargins(Constant.MARGIN_LEFT_RIGHT_DOTS, 0,
-                Constant.MARGIN_LEFT_RIGHT_DOTS, 0);
+                    Constant.MARGIN_LEFT_RIGHT_DOTS, 0);
             mLinearDots.addView(imageDots[i], layoutParams);
         }
     }
@@ -159,14 +164,14 @@ public class HomeFragment extends BaseFragment
             }
         } else {
             Toast.makeText(getContext(), R.string.text_connection_information, Toast.LENGTH_SHORT)
-                .show();
+                    .show();
         }
     }
 
     public void goToListFrag(String genre) {
         getMainActivity().addFragment(
-            SongByGenreFragment.Companion.newInstance(Constant.GENRES_URL + genre, genre), false,
-            SongByGenreFragment.TAG, true);
+                SongByGenreFragment.Companion.newInstance(Constant.GENRES_URL + genre, genre),
+                false, SongByGenreFragment.TAG, true);
     }
 
     @Override
@@ -179,5 +184,44 @@ public class HomeFragment extends BaseFragment
     public void onPause() {
         super.onPause();
         mHandler.removeCallbacks(mRunnable);
+    }
+
+    @Override
+    public void onSlideClicked(int position) {
+        getMainActivity().addFragment(
+                PlayMusicFragment.getOnlineInstance(getFakedPageList(), position), true,
+                PlayMusicFragment.TAG, false);
+    }
+
+    ArrayList<Song> getFakedPageList() {
+        ArrayList<Song> songs = new ArrayList<>();
+        songs.add(new Song("274388374", "Em Làm Gì Tối Nay", "page", "335469825",
+                "https://api.soundcloud.com/tracks/183737184/stream", 245025,
+                "https://api.soundcloud.com/tracks/274388374", new Artist("335469825", "Khac Viet",
+                "https://i1.sndcdn.com/artworks-000172175691-7re150-large.jpg")));
+        songs.add(new Song("258060", "Anh nhớ em", "page", "335469825",
+                "https://api.soundcloud.com/tracks/82356661/stream", 258060,
+                "https://api.soundcloud.com/tracks/344850376", new Artist("335469825", "Tuấn Hưng",
+                "https://i1.sndcdn.com/avatars-000035057508-gvkwjx-large.jpg")));
+        songs.add(new Song("253205285", "Con đường mưa", "page", "335469825",
+                "https://api.soundcloud.com/tracks/253205285/stream", 297118,
+                "https://api.soundcloud.com/tracks/344850376",
+                new Artist("335469825", "Cao Thái Sơn",
+                        "http://nhac.hay365.com/thumbs/240x240/source/picture/album/ConDuongMua.jpg")));
+        songs.add(new Song("344850376", "Thu cuối", "page", "335469825",
+                "https://api.soundcloud.com/tracks/59915507/stream", 289986,
+                "https://api.soundcloud.com/tracks/344850376", new Artist("335469825", "Wanbi",
+                "https://avatar-nct.nixcdn.com/playlist/2012/01/31/o0UNP0XmF8lM.jpg")));
+        songs.add(new Song("344850376", "Tháng tư là lời nói dối của em", "page", "335469825",
+                "https://api.soundcloud.com/tracks/344850376/stream", 310206,
+                "https://api.soundcloud.com/tracks/344850376",
+                new Artist("335469825", "Hằng BingBoong, Yanbi Mr.T",
+                        "https://i1.sndcdn.com/artworks-000245116986-80c0yw-large.jpg")));
+        songs.add(new Song("344850376", "Đoạn đường vắng", "page", "335469825",
+                "https://api.soundcloud.com/tracks/147220242/stream", 189118,
+                "https://api.soundcloud.com/tracks/344850376",
+                new Artist("335469825", "Nhật Kim Anh",
+                        "http://triphuc.com/wp-content/uploads/2014/04/unnamed-300x201.jpg")));
+        return songs;
     }
 }

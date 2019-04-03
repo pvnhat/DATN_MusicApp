@@ -28,9 +28,21 @@ public class Constant {
     public static final String CLIENT_ID = "?client_id=" + BuildConfig.API_KEY;
     public static final String GENRES_URL =
             BASE_URL + "/tracks" + CLIENT_ID + "&linked_partitioning=1&genres=";
-    public static final String CLIENT_ID_V2 = "&client_id=" + BuildConfig.API_KEY; // for next pull request
-    public static final String GENRES_URL_V2 = "https://api-v2.soundcloud.com/charts?kind="; // for next pull request
+    public static final String CLIENT_ID_V2 = "&client_id=" + BuildConfig.API_KEY;
+            // for next pull request
+    public static final String GENRES_URL_V2 = "https://api-v2.soundcloud.com/charts?kind=";
+            // for next pull request
     public static final String LIMIT_NUMBER = "&limit=51";
     public static final String ARRAY_JSON_NAME = "collection";
     public static final String NEXT_HREF = "next_href";
+
+    // INTENT ACTION
+    public static final String GO_TO_PLAYER = "com.framgia.vnnht.music_22.GO_TO_PLAYER";
+    public static final String ACTION_PREVIOUS = "com.framgia.vnnht.music_22.ACTION_PREVIOUS";
+    public static final String ACTION_PLAY_PAUSE = "com.framgia.vnnht.music_22.ACTION_PLAY_PAUSE";
+    public static final String ACTION_PLAY_NEXT = "com.framgia.vnnht.music_22.ACTION_PLAY_NEXT";
+
+    public static final String PREVIOUS = "PREVIOUS";
+    public static final String PAUSE = "PAUSE";
+    public static final String NEXT = "NEXT";
 }

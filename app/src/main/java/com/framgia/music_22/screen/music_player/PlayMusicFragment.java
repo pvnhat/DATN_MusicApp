@@ -1,6 +1,8 @@
 package com.framgia.music_22.screen.music_player;
 
 import android.Manifest;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Context;
@@ -19,11 +21,11 @@ import android.support.v7.widget.AppCompatImageView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
+import android.view.animation.LinearInterpolator;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.framgia.music_22.data.model.OfflineSong;
 import com.framgia.music_22.data.model.Song;
 import com.framgia.music_22.screen.base.BaseFragment;
@@ -35,8 +37,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PlayMusicFragment extends BaseFragment
-    implements View.OnClickListener, PlayMusicContract.View, MusicServiceContract,
-    SeekBar.OnSeekBarChangeListener {
+        implements View.OnClickListener, PlayMusicContract.View, MusicServiceContract,
+        SeekBar.OnSeekBarChangeListener {
 
     public static String TAG = "PlayMusicFragment";
 
@@ -50,12 +52,12 @@ public class PlayMusicFragment extends BaseFragment
     private static final int CHECK_LOOP_ONE = 4;
 
     private AppCompatImageView mButtonPlay, mButtonLoop, mButtonShuffle, mButtonDownload;
-    private AppCompatImageView mButtonPlayMini, mBtnNextMini, mBtnPreviousMini;
+    private AppCompatImageView mButtonPlayMini;
     private TextView mTextTitle, mTextArtist, mTextCurrentTime, mTextDuarationTime, mTextArtistMini,
-        mTextTitleMini;
+            mTextTitleMini;
     private CircleImageView mImageAvatar, mImageAvatarMini;
     private SeekBar mSeekBarProgressSong;
-    private Animation mAnimation;
+    //    private Animation mAnimation;
     private MediaPlayer mMediaPlayer;
     private View mInclude, mViewClick;
     private int mCheckShuffleLoop = 1;
@@ -70,7 +72,7 @@ public class PlayMusicFragment extends BaseFragment
     public static PlayMusicFragment getOnlineInstance(List<Song> songList, int position) {
         Bundle bundle = new Bundle();
         bundle.putParcelableArrayList(EXTRA_PLAY_SONG_ONLINE_LIST,
-            (ArrayList<? extends Parcelable>) songList);
+                (ArrayList<? extends Parcelable>) songList);
         bundle.putInt(EXTRA_ONLINE_SONG_POSITION, position);
         PlayMusicFragment playMusicFragment = new PlayMusicFragment();
         playMusicFragment.setArguments(bundle);
@@ -78,10 +80,10 @@ public class PlayMusicFragment extends BaseFragment
     }
 
     public static PlayMusicFragment getOfflineInstance(List<OfflineSong> songList, int position,
-        boolean check) {
+            boolean check) {
         Bundle bundle = new Bundle();
         bundle.putParcelableArrayList(EXTRA_PLAY_SONG_OFFLINE_LIST,
-            (ArrayList<? extends Parcelable>) songList);
+                (ArrayList<? extends Parcelable>) songList);
         bundle.putInt(EXTRA_OFFLINE_SONG_POSITION, position);
         bundle.putBoolean(EXTRA_IS_OFFLINE, check);
         PlayMusicFragment playMusicFragment = new PlayMusicFragment();
@@ -92,10 +94,31 @@ public class PlayMusicFragment extends BaseFragment
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-        @Nullable Bundle savedInstanceState) {
+            @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_play_music, container, false);
+        initAnim(view.findViewById(R.id.image_avatar));
+        initAnimMini(requireActivity().findViewById(R.id.iv_avatar_mini));
         initView(view);
         return view;
+    }
+
+    private ValueAnimator anim;
+    private ValueAnimator animMini;
+
+    private void initAnim(View targetView) {
+        anim = ObjectAnimator.ofFloat(targetView, View.ROTATION, 0, 360);
+        anim.setInterpolator(new LinearInterpolator());
+        anim.setDuration(10000);
+        anim.setRepeatCount(ValueAnimator.INFINITE);
+        anim.setRepeatMode(ObjectAnimator.RESTART);
+    }
+
+    private void initAnimMini(View targetView) {
+        animMini = ObjectAnimator.ofFloat(targetView, View.ROTATION, 0, 360);
+        animMini.setInterpolator(new LinearInterpolator());
+        animMini.setDuration(10000);
+        animMini.setRepeatCount(ValueAnimator.INFINITE);
+        animMini.setRepeatMode(ObjectAnimator.RESTART);
     }
 
     private void initView(View view) {
@@ -112,14 +135,14 @@ public class PlayMusicFragment extends BaseFragment
         mButtonLoop = view.findViewById(R.id.button_loop);
         mButtonShuffle = view.findViewById(R.id.button_shuffle);
         mButtonDownload = view.findViewById(R.id.button_download);
-        mAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.rotated_avatar_dics);
 
         // mini player
         mButtonPlayMini = requireActivity().findViewById(R.id.button_play_mini);
         mTextTitleMini = requireActivity().findViewById(R.id.tv_title_mini);
         mTextArtistMini = requireActivity().findViewById(R.id.tv_author_mini);
-        mBtnNextMini = requireActivity().findViewById(R.id.button_next_mini);
-        mBtnPreviousMini = requireActivity().findViewById(R.id.button_previous_mini);
+        AppCompatImageView btnNextMini = requireActivity().findViewById(R.id.button_next_mini);
+        AppCompatImageView btnPreviousMini =
+                requireActivity().findViewById(R.id.button_previous_mini);
         mImageAvatarMini = requireActivity().findViewById(R.id.iv_avatar_mini);
         mInclude = requireActivity().findViewById(R.id.include_mini_player);
         mViewClick = requireActivity().findViewById(R.id.view_mini_player);
@@ -130,8 +153,8 @@ public class PlayMusicFragment extends BaseFragment
         buttonNext.setOnClickListener(this);
         mButtonPlay.setOnClickListener(this);
         mButtonPlayMini.setOnClickListener(this);
-        mBtnNextMini.setOnClickListener(this);
-        mBtnPreviousMini.setOnClickListener(this);
+        btnNextMini.setOnClickListener(this);
+        btnPreviousMini.setOnClickListener(this);
         mButtonLoop.setOnClickListener(this);
         mButtonShuffle.setOnClickListener(this);
         mButtonDownload.setOnClickListener(this);
@@ -177,26 +200,30 @@ public class PlayMusicFragment extends BaseFragment
                 if (mPlayMusicService.isMusicPlaying()) {
                     mPlayMusicService.pauseSong();
                     mButtonPlay.setImageResource(R.drawable.ic_play_button);
-                    mImageAvatar.setAnimation(null);
-                    mImageAvatarMini.setAnimation(null);
+                    //                    mImageAvatar.setAnimation(null);
+                    //                    mImageAvatarMini.setAnimation(null);
+                    pauseAnimation();
                 } else {
                     mPlayMusicService.continueSong();
                     mButtonPlay.setImageResource(R.drawable.ic_pause_button);
-                    mImageAvatar.setAnimation(mAnimation);
-                    mImageAvatarMini.setAnimation(mAnimation);
+                    //                    mImageAvatar.setAnimation(mAnimation);
+                    //                    mImageAvatarMini.setAnimation(mAnimation);
+                    startOrResumeAnimation();
                 }
                 break;
             case R.id.button_play_mini:
                 if (mPlayMusicService.isMusicPlaying()) {
                     mPlayMusicService.pauseSong();
                     mButtonPlayMini.setImageResource(R.drawable.ic_play_button);
-                    mImageAvatar.setAnimation(null);
-                    mImageAvatarMini.setAnimation(null);
+                    //                    mImageAvatar.setAnimation(null);
+                    //                    mImageAvatarMini.setAnimation(null);
+                    pauseAnimation();
                 } else {
                     mPlayMusicService.continueSong();
                     mButtonPlayMini.setImageResource(R.drawable.ic_pause_button);
-                    mImageAvatar.setAnimation(mAnimation);
-                    mImageAvatarMini.setAnimation(mAnimation);
+                    //                    mImageAvatar.setAnimation(mAnimation);
+                    //                    mImageAvatarMini.setAnimation(mAnimation);
+                    startOrResumeAnimation();
                 }
                 break;
             case R.id.button_next:
@@ -222,9 +249,24 @@ public class PlayMusicFragment extends BaseFragment
         }
     }
 
+    private void pauseAnimation() {
+        anim.pause();
+        animMini.pause();
+    }
+
+    private void startOrResumeAnimation() {
+        if (anim.isStarted()) {
+            anim.resume();
+            animMini.resume();
+        } else {
+            anim.start();
+            animMini.start();
+        }
+    }
+
     private void hideFragment() {
         mNavigator.hideFragment(getMainActivity().getSupportFragmentManager(),
-            PlayMusicFragment.this, false, true);
+                PlayMusicFragment.this, false, true);
     }
 
     private void setViewLoopButton() {
@@ -259,13 +301,13 @@ public class PlayMusicFragment extends BaseFragment
         if (getArguments().getParcelableArrayList(EXTRA_PLAY_SONG_ONLINE_LIST) != null) {
             int position = getArguments().getInt(EXTRA_ONLINE_SONG_POSITION, -1);
             List<Song> songOnlineList =
-                getArguments().getParcelableArrayList(EXTRA_PLAY_SONG_ONLINE_LIST);
+                    getArguments().getParcelableArrayList(EXTRA_PLAY_SONG_ONLINE_LIST);
             assert songOnlineList != null;
             onPlayMusicOnlineControl(songOnlineList, position);
         } else {
             int position = getArguments().getInt(EXTRA_OFFLINE_SONG_POSITION, -1);
             List<OfflineSong> songOfflineList =
-                getArguments().getParcelableArrayList(EXTRA_PLAY_SONG_OFFLINE_LIST);
+                    getArguments().getParcelableArrayList(EXTRA_PLAY_SONG_OFFLINE_LIST);
             assert songOfflineList != null;
             onPlayMusicOfflineControl(songOfflineList, position, isOffline);
         }
@@ -278,22 +320,28 @@ public class PlayMusicFragment extends BaseFragment
         mTextArtistMini.setText(songs.get(position).getArtist().getSingerName());
         mButtonPlay.setImageResource(R.drawable.ic_pause_button);
         mButtonPlayMini.setImageResource(R.drawable.ic_pause_button);
-        mImageAvatar.setAnimation(mAnimation);
+        //        mImageAvatar.setAnimation(mAnimation);
+        startOrResumeAnimation();
         Glide.with(this).load(songs.get(position).getArtist().getAvatarUrl()).into(mImageAvatar);
+        Glide.with(this)
+                .load(songs.get(position).getArtist().getAvatarUrl())
+                .into(mImageAvatarMini);
         onPlayMusicOnline(songs, position);
     }
 
     private void onPlayMusicOfflineControl(List<OfflineSong> songs, int position,
-        boolean isOffline) {
+            boolean isOffline) {
         mTextTitle.setText(songs.get(position).getTitle());
         mTextTitleMini.setText(songs.get(position).getTitle());
         mTextArtist.setText(songs.get(position).getArtistName());
         mTextArtistMini.setText(songs.get(position).getArtistName());
         mButtonPlay.setImageResource(R.drawable.ic_pause_button);
         mButtonPlayMini.setImageResource(R.drawable.ic_pause_button);
-        mImageAvatar.setAnimation(mAnimation);
+        //        mImageAvatar.setAnimation(mAnimation);
+        startOrResumeAnimation();
         mButtonDownload.setVisibility(View.INVISIBLE);
         Glide.with(this).load(R.drawable.default_avatart_song).into(mImageAvatar);
+        Glide.with(this).load(R.drawable.default_avatart_song).into(mImageAvatarMini);
         onPlayMusicOffline(songs, position, isOffline);
     }
 
@@ -304,8 +352,8 @@ public class PlayMusicFragment extends BaseFragment
     }
 
     private void onPlayMusicOffline(List<OfflineSong> songList, int position, boolean isOffline) {
-        Intent intent =
-            PlayMusicService.getOfflineInstance(requireContext(), songList, position, isOffline);
+        Intent intent = PlayMusicService.getOfflineInstance(requireContext(), songList, position,
+                isOffline);
         requireActivity().startService(intent);
         requireActivity().bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
     }
@@ -314,7 +362,7 @@ public class PlayMusicFragment extends BaseFragment
     public void updateMediaToClient(MediaPlayer mediaPlayer) {
         mMediaPlayer = mediaPlayer;
         @SuppressLint("SimpleDateFormat") SimpleDateFormat dateFormat =
-            new SimpleDateFormat(TIME_FORMAT);
+                new SimpleDateFormat(TIME_FORMAT);
         if (mMediaPlayer.isPlaying()) {
             mTextCurrentTime.setText(dateFormat.format(mMediaPlayer.getCurrentPosition()));
             mTextDuarationTime.setText(dateFormat.format(mMediaPlayer.getDuration()));
@@ -322,9 +370,15 @@ public class PlayMusicFragment extends BaseFragment
             mButtonPlay.setImageResource(R.drawable.ic_pause_button);
             mButtonPlayMini.setImageResource(R.drawable.ic_pause_button);
             mSeekBarProgressSong.setProgress(mediaPlayer.getCurrentPosition());
+            //            mImageAvatar.setAnimation(mAnimation);
+            //            mImageAvatarMini.setAnimation(mAnimation);
+            startOrResumeAnimation();
         } else {
             mButtonPlay.setImageResource(R.drawable.ic_play_button);
             mButtonPlayMini.setImageResource(R.drawable.ic_play_button);
+            //            mImageAvatar.setAnimation(null);
+            //            mImageAvatarMini.setAnimation(null);
+            pauseAnimation();
         }
     }
 
@@ -334,9 +388,15 @@ public class PlayMusicFragment extends BaseFragment
         mTextTitleMini.setText(song.getTitle());
         mTextArtist.setText(song.getArtist().getSingerName());
         mTextArtistMini.setText(song.getArtist().getSingerName());
-        if (song.getArtist().getAvatarUrl() != null && song.getArtist().getAvatarUrl().isEmpty()) {
-            Glide.with(this).load(song.getArtist().getAvatarUrl()).into(mImageAvatarMini);
-            Glide.with(this).load(song.getArtist().getAvatarUrl()).into(mImageAvatar);
+        if (song.getArtist().getAvatarUrl() != null && !song.getArtist().getAvatarUrl().isEmpty()) {
+            Glide.with(this)
+                    .load(song.getArtist().getAvatarUrl())
+                    .apply(RequestOptions.placeholderOf(R.drawable.default_avatart_song))
+                    .into(mImageAvatarMini);
+            Glide.with(this)
+                    .load(song.getArtist().getAvatarUrl())
+                    .apply(RequestOptions.placeholderOf(R.drawable.default_avatart_song))
+                    .into(mImageAvatar);
         }
     }
 
@@ -369,12 +429,12 @@ public class PlayMusicFragment extends BaseFragment
 
     private void onRequestStoragePermission() {
         if (ContextCompat.checkSelfPermission(requireContext(),
-            Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
             mPlayMusicService.downloadSong();
         } else {
             ActivityCompat.requestPermissions(requireActivity(),
-                new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE },
-                REQUEST_PERMISSION_CODE);
+                    new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE },
+                    REQUEST_PERMISSION_CODE);
         }
     }
 }

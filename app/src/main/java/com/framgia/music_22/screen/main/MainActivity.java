@@ -16,8 +16,8 @@ import com.framgia.music_22.utils.TypeTab;
 import com.framgia.vnnht.music_22.R;
 
 public class MainActivity extends AppCompatActivity
-    implements BottomNavigationView.OnNavigationItemSelectedListener,
-    ViewPager.OnPageChangeListener {
+        implements BottomNavigationView.OnNavigationItemSelectedListener,
+        ViewPager.OnPageChangeListener {
 
     private static final String SONG_ID = "SongId";
     private static final String TITLE = "Title";
@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity
     private static final String DURATION = "Duration";
     private static final String TIME_FORMAT = "mm:ss";
 
+    private ReloadFragmentCallBack mReloadFragmentCallBack;
     private ViewPager mPagerMain;
     private BottomNavigationView mBottomNavigationViewavigation;
     private MenuItem mPrevMenuItem;
@@ -44,20 +45,24 @@ public class MainActivity extends AppCompatActivity
     private void initDatabase() {
         DatabaseSQLite databaseSQLite = new DatabaseSQLite(this);
         databaseSQLite.queryData("CREATE TABLE IF NOT EXISTS "
-            + DatabaseSQLite.TABLE_NAME
-            + " ("
-            + SONG_ID
-            + " TEXT PRIMARY KEY,"
-            + TITLE
-            + " TEXT,"
-            + GENRE
-            + " TEXT,"
-            + SONG_PATH
-            + " TEXT,"
-            + ARTIST_NAME
-            + " TEXT,"
-            + DURATION
-            + " INTEGER)");
+                + DatabaseSQLite.TABLE_NAME
+                + " ("
+                + SONG_ID
+                + " TEXT PRIMARY KEY,"
+                + TITLE
+                + " TEXT,"
+                + GENRE
+                + " TEXT,"
+                + SONG_PATH
+                + " TEXT,"
+                + ARTIST_NAME
+                + " TEXT,"
+                + DURATION
+                + " INTEGER)");
+    }
+
+    public void setReloadFragmentCallBack(ReloadFragmentCallBack reloadFragmentCallBack) {
+        mReloadFragmentCallBack = reloadFragmentCallBack;
     }
 
     @Override
@@ -67,6 +72,7 @@ public class MainActivity extends AppCompatActivity
                 mPagerMain.setCurrentItem(TypeTab.TAB_HOME);
                 return true;
             case R.id.item_offline:
+                mReloadFragmentCallBack.reloadFragment();
                 mPagerMain.setCurrentItem(TypeTab.TAB_OFFLINE);
                 return true;
             case R.id.item_singer:
@@ -95,7 +101,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View view) {
                 Fragment fragment =
-                    mNavigator.findFragment(MainActivity.this, PlayMusicFragment.TAG);
+                        mNavigator.findFragment(MainActivity.this, PlayMusicFragment.TAG);
                 mNavigator.showFragment(getSupportFragmentManager(), fragment, false, true);
             }
         });
@@ -123,10 +129,10 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void addFragment(Fragment fragment, Boolean haveAnimation, String tag,
-        Boolean addToBackStack) {
+            Boolean addToBackStack) {
         Navigator navigator = new Navigator();
         navigator.addFragment(getSupportFragmentManager(), fragment, R.id.fl_container_full,
-            addToBackStack, tag, null, haveAnimation);
+                addToBackStack, tag, null, haveAnimation);
     }
 
     private void setUpViewPager(ViewPager viewPager) {
@@ -140,8 +146,14 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-        this.overridePendingTransition(R.anim.slide_bottom_up, R.anim.slide_top_down);
+        Fragment playMusicFragment = mNavigator.findFragment(this, PlayMusicFragment.TAG);
+        if (playMusicFragment != null && playMusicFragment.isVisible()) {
+            mNavigator.hideFragment(getSupportFragmentManager(), playMusicFragment, false, true);
+            mInclude.setVisibility(View.VISIBLE);
+        } else {
+            super.onBackPressed();
+            this.overridePendingTransition(R.anim.slide_bottom_up, R.anim.slide_top_down);
+        }
     }
 
     public void hideBottomButton() {
