@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">music_22</string>
+    <string name="app_name">MusicVN</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
@@ -16,7 +16,7 @@
     <string name="text_for_testing">Cuoc Song Em On Khong</string>
     <string name="text_time">00:00</string>
     <string name="text_inform_to_client_permisson">You have already permiss this permission !</string>
-    <string name="text_dowloading">Downloading ...</string>
+    <string name="text_dowloading">Downloading …</string>
     <string name="text_download">Download:</string>
     <string name="text_notification_playing">Playing Music</string>
     <string name="text_inforn_downloaded_song">You have already downloaded this song !</string>
@@ -24,8 +24,9 @@
     <string name="text_search_inform">Input song name !</string>
     <string name="text_connection_information">There is no connection</string>
     <string name="text_last_song_if">Last song in list !</string>
-    <string name="searching_song_name">Searching song name ...</string>
+    <string name="searching_song_name">Search song name …</string>
     <string name="new_hot"><![CDATA[New & Hot]]></string>
     <string name="top_50_songs">Top 50 songs</string>
     <string name="other_genres">Other genres</string>
+    <string name="no_song">Download song and play it offline! </string>
 </resources>

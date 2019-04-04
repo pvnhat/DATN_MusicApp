@@ -19,12 +19,13 @@ import com.framgia.vnnht.music_22.R;
 import java.util.List;
 
 public class OfflineFragment extends BaseFragment
-    implements OfflineContract.View, OnItemClickListener, ReloadFragmentCallBack {
+        implements OfflineContract.View, OnItemClickListener, ReloadFragmentCallBack {
 
     public static String TAG = "OfflineFragment";
     private List<OfflineSong> mOfflineSongList;
     private RecyclerView mRecyclerSongList;
     private OfflineSongAdapter mAdapter;
+    private View mEmptyLayout;
 
     public static OfflineFragment newInstance() {
         return new OfflineFragment();
@@ -33,7 +34,7 @@ public class OfflineFragment extends BaseFragment
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
-        Bundle savedInstanceState) {
+            Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_offline, container, false);
         initView(view);
         return view;
@@ -41,6 +42,7 @@ public class OfflineFragment extends BaseFragment
 
     private void initView(View view) {
         mRecyclerSongList = view.findViewById(R.id.recycler_offline_song);
+        mEmptyLayout = view.findViewById(R.id.layout_empty);
         mRecyclerSongList.setHasFixedSize(true);
         mAdapter = new OfflineSongAdapter(getContext());
         mRecyclerSongList.setAdapter(mAdapter);
@@ -51,18 +53,21 @@ public class OfflineFragment extends BaseFragment
     public void initData() {
         SongRemoteDataSource songRemoteDataSource = SongRemoteDataSource.getInstance();
         SongLocalDataSource songLocalDataSource =
-            SongLocalDataSource.getInstance(getActivity().getApplicationContext());
+                SongLocalDataSource.getInstance(getActivity().getApplicationContext());
         SongRepository songRepository =
-            SongRepository.getsInstance(songRemoteDataSource, songLocalDataSource);
+                SongRepository.getsInstance(songRemoteDataSource, songLocalDataSource);
         OfflinePresenter presenter = new OfflinePresenter(this, songRepository);
         presenter.getSong();
     }
 
     @Override
     public void onGetSongOfflineSuccess(List<OfflineSong> offlineSongs) {
-        if (offlineSongs.size() > 0) {
+        if (!offlineSongs.isEmpty()) {
             mOfflineSongList = offlineSongs;
             mAdapter.updateSongList(mOfflineSongList);
+            mEmptyLayout.setVisibility(View.GONE);
+        } else {
+            mEmptyLayout.setVisibility(View.VISIBLE);
         }
     }
 
@@ -74,8 +79,8 @@ public class OfflineFragment extends BaseFragment
     @Override
     public void onItemClick(int position) {
         getMainActivity().addFragment(
-            PlayMusicFragment.getOfflineInstance(mOfflineSongList, position, true), true,
-            PlayMusicFragment.TAG, false);
+                PlayMusicFragment.getOfflineInstance(mOfflineSongList, position, true), true,
+                PlayMusicFragment.TAG, false);
     }
 
     @Override

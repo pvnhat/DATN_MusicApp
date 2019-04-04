@@ -5,6 +5,7 @@
     <color name="colorAccent">#FF4081</color>
     <color name="color_white_100">#ffffff</color>
     <color name="color_black_100">#FF000000</color>
+    <color name="color_black_50">#92444444</color>
     <color name="color_green_50">#26A69A</color>
     <color name="color_transparent_100">#00000000</color>
     <color name="color_black_51">#33FFFFFF</color>
@@ -14,4 +15,5 @@
     <color name="color_purple_80">#8c91d2</color>
     <color name="color_black_30">#947777</color>
     <color name="color_orange_60">#9EFF5722</color>
+    <color name="color_orange_95">#F3FF3D00</color>
 </resources>
