@@ -22,16 +22,20 @@
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustNothing">
+        </activity>
+
+        <service
+            android:name="com.framgia.music_22.screen.music_player.PlayMusicService"
+            android:enabled="true"
+            android:exported="true"/>
+
+        <activity android:name="com.framgia.music_22.screen.splash.SplashScreenActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <service
-            android:name="com.framgia.music_22.screen.music_player.PlayMusicService"
-            android:enabled="true"
-            android:exported="true"/>
     </application>
 
 </manifest>

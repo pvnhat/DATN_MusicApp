@@ -9,6 +9,7 @@ import android.support.v4.app.FragmentActivity
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentTransaction
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import com.framgia.vnnht.music_22.R
 
 /**
@@ -110,5 +111,11 @@ class Navigator {
 
     fun findFragment(activity: Activity, TAG: String): Fragment? {
         return (activity as FragmentActivity).supportFragmentManager.findFragmentByTag(TAG)
+    }
+
+    fun hideKeyBoard(activity: Activity) {
+        val inputMethod = activity.getSystemService(
+            Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethod.hideSoftInputFromWindow(activity.currentFocus.windowToken, 0)
     }
 }
