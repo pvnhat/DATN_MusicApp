@@ -19,4 +19,5 @@ public @interface TypeGenre {
     String DISCO = "Disco";
     String PIANO = "Piano";
     String POP = "Pop";
+    String ELECTRONIC = "Electronic";
 }

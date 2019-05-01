@@ -9,7 +9,6 @@ import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -21,6 +20,7 @@ import com.framgia.music_22.screen.song_list.SongByGenreFragment;
 import com.framgia.music_22.utils.ConnectionChecking;
 import com.framgia.music_22.utils.Constant;
 import com.framgia.music_22.utils.TypeGenre;
+import com.framgia.music_22.utils.custom_view.GenreButton;
 import com.framgia.vnnht.music_22.R;
 import java.util.ArrayList;
 
@@ -70,11 +70,12 @@ public class HomeFragment extends BaseFragment
     private void initView(View view) {
         viewPagerBanner = view.findViewById(R.id.viewpager_banner);
         mLinearDots = view.findViewById(R.id.linear_dots);
-        ImageButton buttonAllAudio = view.findViewById(R.id.button_all_audios);
-        ImageButton buttonAllSong = view.findViewById(R.id.button_all_song);
-        ImageButton buttonAlternativeRock = view.findViewById(R.id.button_alternativerock);
-        ImageButton buttonAmbient = view.findViewById(R.id.button_ambient);
-        ImageButton buttonClassic = view.findViewById(R.id.button_classic);
+        GenreButton buttonAllAudio = view.findViewById(R.id.button_all_audios);
+        GenreButton buttonAllSong = view.findViewById(R.id.button_all_song);
+        GenreButton buttonAlternativeRock = view.findViewById(R.id.button_alternative_rock);
+        GenreButton buttonAmbient = view.findViewById(R.id.button_ambient);
+        GenreButton buttonClassic = view.findViewById(R.id.button_classic);
+        GenreButton buttonElectronic = view.findViewById(R.id.button_electronic);
         mConnectionChecking = new ConnectionChecking(getContext().getApplicationContext());
 
         viewPagerBanner.setOnPageChangeListener(this);
@@ -83,6 +84,7 @@ public class HomeFragment extends BaseFragment
         buttonAlternativeRock.setOnClickListener(this);
         buttonAmbient.setOnClickListener(this);
         buttonClassic.setOnClickListener(this);
+        buttonElectronic.setOnClickListener(this);
 
         mHandler = new Handler();
         slidePagerAdapter = new SlidePagerAdapter(getActivity(), this);
@@ -152,7 +154,7 @@ public class HomeFragment extends BaseFragment
                 case R.id.button_all_song:
                     goToListFrag(TypeGenre.ALL_MUSIC);
                     break;
-                case R.id.button_alternativerock:
+                case R.id.button_alternative_rock:
                     goToListFrag(TypeGenre.ALTERNATIVEROCK);
                     break;
                 case R.id.button_ambient:
@@ -161,6 +163,8 @@ public class HomeFragment extends BaseFragment
                 case R.id.button_classic:
                     goToListFrag(TypeGenre.CLASSICAL);
                     break;
+                case R.id.button_electronic:
+                    goToListFrag(TypeGenre.ELECTRONIC);
             }
         } else {
             Toast.makeText(getContext(), R.string.text_connection_information, Toast.LENGTH_SHORT)
@@ -207,7 +211,8 @@ public class HomeFragment extends BaseFragment
                 "https://api.soundcloud.com/tracks/253205285/stream", 297118,
                 "https://api.soundcloud.com/tracks/344850376",
                 new Artist("335469825", "Cao Thái Sơn",
-                        "http://nhac.hay365.com/thumbs/240x240/source/picture/album/ConDuongMua.jpg")));
+                        "http://nhac.hay365.com/thumbs/240x240/source/picture/album/ConDuongMua"
+                                + ".jpg")));
         songs.add(new Song("344850376", "Thu cuối", "page", "335469825",
                 "https://api.soundcloud.com/tracks/59915507/stream", 289986,
                 "https://api.soundcloud.com/tracks/344850376", new Artist("335469825", "Wanbi",

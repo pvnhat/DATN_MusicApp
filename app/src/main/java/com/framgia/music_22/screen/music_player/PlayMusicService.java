@@ -449,7 +449,7 @@ public class PlayMusicService extends Service implements NotificationCallBack {
                     .build();
         } else {
             Bitmap bitmapIcon = BitmapFactory.decodeResource(this.getResources(),
-                    R.drawable.default_avatart_song);
+                    R.drawable.default_avatar_song);
             notification = new NotificationCompat.Builder(this, sChannelId).setContentTitle(
                     getString(R.string.text_notification_playing))
                     .setAutoCancel(true)
