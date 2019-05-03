@@ -20,4 +20,6 @@ public @interface TypeGenre {
     String PIANO = "Piano";
     String POP = "Pop";
     String ELECTRONIC = "Electronic";
+    String NEW = "New";
+    String HOT = "Hot";
 }

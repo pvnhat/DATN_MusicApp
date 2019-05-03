@@ -380,24 +380,30 @@ public class PlayMusicService extends Service implements NotificationCallBack {
     }
 
     private void loadBitmapToStartNotification(final Boolean isThenStop) {
-        Disposable disposable = getBitmapArtistAvatar(
-                mOnlineSongList.get(mPosition).getArtist().getAvatarUrl()).subscribeOn(
-                Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<Bitmap>() {
-                    @Override
-                    public void accept(Bitmap bitmap) throws Exception {
-                        startForeground(ID_FOREGROUND_SERVICE, initForegroundService(bitmap));
-                        if (isThenStop) {
-                            stopForeground(false);
-                        }
-                    }
-                }, new Consumer<Throwable>() {
-                    @Override
-                    public void accept(Throwable throwable) throws Exception {
-                        startForeground(ID_FOREGROUND_SERVICE, initForegroundService(null));
-                    }
-                });
+        if (!mIsOffline) {
+            Disposable disposable =
+                    getBitmapArtistAvatar(mOnlineSongList.get(mPosition).getArtist().getAvatarUrl())
+                            .subscribeOn(Schedulers.newThread())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(new Consumer<Bitmap>() {
+                                @Override
+                                public void accept(Bitmap bitmap) throws Exception {
+                                    startForeground(ID_FOREGROUND_SERVICE,
+                                            initForegroundService(bitmap));
+                                    if (isThenStop) {
+                                        stopForeground(false);
+                                    }
+                                }
+                            }, new Consumer<Throwable>() {
+                                @Override
+                                public void accept(Throwable throwable) throws Exception {
+                                    startForeground(ID_FOREGROUND_SERVICE,
+                                            initForegroundService(null));
+                                }
+                            });
+        } else {
+            startForeground(ID_FOREGROUND_SERVICE, initForegroundService(null));
+        }
     }
 
     public Notification initForegroundService(Bitmap bitmap) {
@@ -461,6 +467,9 @@ public class PlayMusicService extends Service implements NotificationCallBack {
                     .addAction(actionPrevious)
                     .addAction(actionPause)
                     .addAction(actionNext)
+                    .setStyle(
+                            new android.support.v4.media.app.NotificationCompat.MediaStyle().setShowActionsInCompactView(
+                                    0, 1, 2))
                     .build();
         }
 

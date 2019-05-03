@@ -190,6 +190,7 @@ public class PlayMusicFragment extends BaseFragment
                 mPlayMusicService.previousSong();
                 mTextCurrentTime.setText(R.string.text_time);
                 mTextDuarationTime.setText(R.string.text_time);
+                mSeekBarProgressSong.setProgress(0);
                 break;
             case R.id.button_previous_mini:
                 mPlayMusicService.previousSong();
@@ -230,6 +231,7 @@ public class PlayMusicFragment extends BaseFragment
                 mPlayMusicService.nextSong(true);
                 mTextCurrentTime.setText(R.string.text_time);
                 mTextDuarationTime.setText(R.string.text_time);
+                mSeekBarProgressSong.setProgress(0);
                 break;
             case R.id.button_next_mini:
                 mPlayMusicService.nextSong(true);
@@ -296,7 +298,10 @@ public class PlayMusicFragment extends BaseFragment
 
     @Override
     public void initData() {
-        boolean isOffline = requireActivity().getIntent().getBooleanExtra(EXTRA_IS_OFFLINE, false);
+        boolean isOffline = false;
+        if (getArguments() != null) {
+            isOffline = getArguments().getBoolean(EXTRA_IS_OFFLINE, false);
+        }
         assert getArguments() != null;
         if (getArguments().getParcelableArrayList(EXTRA_PLAY_SONG_ONLINE_LIST) != null) {
             int position = getArguments().getInt(EXTRA_ONLINE_SONG_POSITION, -1);

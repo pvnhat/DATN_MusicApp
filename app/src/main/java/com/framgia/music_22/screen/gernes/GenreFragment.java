@@ -29,7 +29,7 @@ public class GenreFragment extends BaseFragment implements View.OnClickListener 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
-        Bundle savedInstanceState) {
+            Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_gernes, container, false);
         initView(view);
         return view;
@@ -63,8 +63,10 @@ public class GenreFragment extends BaseFragment implements View.OnClickListener 
         if (mConnectionChecking.isNetworkConnection()) {
             switch (view.getId()) {
                 case R.id.button_trending:
+                    goToListFrag(TypeGenre.NEW);
                     break;
                 case R.id.button_hot:
+                    goToListFrag(TypeGenre.HOT);
                     break;
                 case R.id.button_country:
                     goToListFrag(TypeGenre.COUNTRY);
@@ -90,14 +92,14 @@ public class GenreFragment extends BaseFragment implements View.OnClickListener 
             }
         } else {
             Toast.makeText(getContext(),
-                getResources().getString(R.string.text_connection_information), Toast.LENGTH_SHORT)
-                .show();
+                    getResources().getString(R.string.text_connection_information),
+                    Toast.LENGTH_SHORT).show();
         }
     }
 
     public void goToListFrag(String genre) {
         getMainActivity().addFragment(
-            SongByGenreFragment.Companion.newInstance(Constant.GENRES_URL + genre, genre), false,
-            TAG, true);
+                SongByGenreFragment.Companion.newInstance(Constant.GENRES_URL + genre, genre),
+                false, TAG, true);
     }
 }

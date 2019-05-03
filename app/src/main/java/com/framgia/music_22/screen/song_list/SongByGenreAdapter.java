@@ -30,7 +30,7 @@ public class SongByGenreAdapter extends RecyclerView.Adapter<SongByGenreAdapter.
         if (mSongList != null) {
             mSongList.clear();
         }
-        mSongList = songList;
+        mSongList.addAll(songList);
         notifyDataSetChanged();
     }
 
