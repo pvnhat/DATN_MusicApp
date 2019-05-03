@@ -340,8 +340,8 @@ public class PlayMusicFragment extends BaseFragment
         //        mImageAvatar.setAnimation(mAnimation);
         startOrResumeAnimation();
         mButtonDownload.setVisibility(View.INVISIBLE);
-        Glide.with(this).load(R.drawable.default_avatart_song).into(mImageAvatar);
-        Glide.with(this).load(R.drawable.default_avatart_song).into(mImageAvatarMini);
+        Glide.with(this).load(R.drawable.default_avatar_song).into(mImageAvatar);
+        Glide.with(this).load(R.drawable.default_avatar_song).into(mImageAvatarMini);
         onPlayMusicOffline(songs, position, isOffline);
     }
 
@@ -391,11 +391,11 @@ public class PlayMusicFragment extends BaseFragment
         if (song.getArtist().getAvatarUrl() != null && !song.getArtist().getAvatarUrl().isEmpty()) {
             Glide.with(this)
                     .load(song.getArtist().getAvatarUrl())
-                    .apply(RequestOptions.placeholderOf(R.drawable.default_avatart_song))
+                    .apply(RequestOptions.placeholderOf(R.drawable.default_avatar_song))
                     .into(mImageAvatarMini);
             Glide.with(this)
                     .load(song.getArtist().getAvatarUrl())
-                    .apply(RequestOptions.placeholderOf(R.drawable.default_avatart_song))
+                    .apply(RequestOptions.placeholderOf(R.drawable.default_avatar_song))
                     .into(mImageAvatar);
         }
     }
@@ -406,8 +406,8 @@ public class PlayMusicFragment extends BaseFragment
         mTextTitleMini.setText(song.getTitle());
         mTextArtist.setText(song.getArtistName());
         mTextArtistMini.setText(song.getArtistName());
-        Glide.with(this).load(R.drawable.default_avatart_song).into(mImageAvatar);
-        Glide.with(this).load(R.drawable.default_avatart_song).into(mImageAvatarMini);
+        Glide.with(this).load(R.drawable.default_avatar_song).into(mImageAvatar);
+        Glide.with(this).load(R.drawable.default_avatar_song).into(mImageAvatarMini);
     }
 
     @Override

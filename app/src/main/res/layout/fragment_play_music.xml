@@ -69,7 +69,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="@dimen/dp_60"
-        android:src="@drawable/default_avatart_song"
+        android:src="@drawable/default_avatar_song"
         app:civ_border_color="@color/color_white_100"
         app:civ_border_width="@dimen/dp_5"
         app:layout_constraintHeight_percent=".35"

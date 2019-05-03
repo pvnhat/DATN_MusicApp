@@ -23,7 +23,7 @@ public class SongLocalDataSource implements SongDataSource.LocalDataSource {
         return sInstance;
     }
 
-    public List<OfflineSong> onGetDataFromStorage() {
+    private List<OfflineSong> onGetDataFromStorage() {
         return mDatabaseController.getListMusicLocal();
     }
 

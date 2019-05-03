@@ -5,4 +5,9 @@
         <attr format="boolean" name="autoSmoothScroll"/>
         <attr format="integer" name="autoScrollInterval"/>
     </declare-styleable>
+    <declare-styleable name="GenreButton">
+        <attr format="string" name="genre_name"/>
+        <attr format="integer" name="video_number"/>
+        <attr name="genre_avatar"/>
+    </declare-styleable>
 </resources>

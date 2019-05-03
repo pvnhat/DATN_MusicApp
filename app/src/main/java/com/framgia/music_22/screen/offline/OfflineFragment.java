@@ -52,12 +52,14 @@ public class OfflineFragment extends BaseFragment
 
     public void initData() {
         SongRemoteDataSource songRemoteDataSource = SongRemoteDataSource.getInstance();
-        SongLocalDataSource songLocalDataSource =
-                SongLocalDataSource.getInstance(getActivity().getApplicationContext());
-        SongRepository songRepository =
-                SongRepository.getsInstance(songRemoteDataSource, songLocalDataSource);
-        OfflinePresenter presenter = new OfflinePresenter(this, songRepository);
-        presenter.getSong();
+        if (getActivity() != null) {
+            SongLocalDataSource songLocalDataSource =
+                    SongLocalDataSource.getInstance(getActivity().getApplicationContext());
+            SongRepository songRepository =
+                    SongRepository.getsInstance(songRemoteDataSource, songLocalDataSource);
+            OfflinePresenter presenter = new OfflinePresenter(this, songRepository);
+            presenter.getSong();
+        }
     }
 
     @Override
