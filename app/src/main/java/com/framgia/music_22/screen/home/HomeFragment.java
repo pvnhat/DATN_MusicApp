@@ -71,11 +71,17 @@ public class HomeFragment extends BaseFragment
         viewPagerBanner = view.findViewById(R.id.viewpager_banner);
         mLinearDots = view.findViewById(R.id.linear_dots);
         GenreButton buttonAllAudio = view.findViewById(R.id.button_all_audios);
+        buttonAllAudio.setTvNumber(431);
         GenreButton buttonAllSong = view.findViewById(R.id.button_all_song);
+        buttonAllSong.setTvNumber(664);
         GenreButton buttonAlternativeRock = view.findViewById(R.id.button_alternative_rock);
+        buttonAlternativeRock.setTvNumber(459);
         GenreButton buttonAmbient = view.findViewById(R.id.button_ambient);
+        buttonAmbient.setTvNumber(273);
         GenreButton buttonClassic = view.findViewById(R.id.button_classic);
+        buttonClassic.setTvNumber(346);
         GenreButton buttonElectronic = view.findViewById(R.id.button_electronic);
+        buttonElectronic.setTvNumber(436);
         mConnectionChecking = new ConnectionChecking(getContext().getApplicationContext());
 
         viewPagerBanner.setOnPageChangeListener(this);
@@ -192,9 +198,14 @@ public class HomeFragment extends BaseFragment
 
     @Override
     public void onSlideClicked(int position) {
-        getMainActivity().addFragment(
-                PlayMusicFragment.getOnlineInstance(getFakedPageList(), position), true,
-                PlayMusicFragment.TAG, false);
+        if (!mConnectionChecking.isNetworkConnection()) {
+            Toast.makeText(getContext(), R.string.text_connection_information, Toast.LENGTH_SHORT)
+                    .show();
+        } else {
+            getMainActivity().addFragment(
+                    PlayMusicFragment.getOnlineInstance(getFakedPageList(), position), true,
+                    PlayMusicFragment.TAG, false);
+        }
     }
 
     ArrayList<Song> getFakedPageList() {

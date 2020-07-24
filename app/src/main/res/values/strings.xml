@@ -25,8 +25,8 @@
     <string name="text_connection_information">There is no connection</string>
     <string name="text_last_song_if">Last song in list !</string>
     <string name="searching_song_name">Search song name …</string>
-    <string name="new_hot"><![CDATA[New & Hot]]></string>
-    <string name="top_50_songs">Top 50 songs</string>
+    <string name="new_music"><![CDATA[New Songs]]></string>
+    <string name="hot_music">Hot songs</string>
     <string name="other_genres">Other genres</string>
     <string name="no_song">Download song and play it offline! </string>
     <string name="enjoy_your_life">Enjoy your time!</string>
